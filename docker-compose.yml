@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  fakecloud:
+    image: ghcr.io/faiscadev/fakecloud:latest  # <-- Correct GHCR address
+    container_name: fakecloud
+    ports:
+      - "4566:4566"
+    environment:
+      - FAKECLOUD_BEDROCK_UPSTREAM_URL=http://host.docker.internal:11434
+      - FAKECLOUD_BEDROCK_UPSTREAM_PROTOCOL=ollama
+      - FAKECLOUD_BEDROCK_UPSTREAM_MODEL=deepseek-r1:1.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

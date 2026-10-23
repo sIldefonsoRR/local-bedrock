@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Local AWS Bedrock emulation sandbox. A `fakecloud` container (`ghcr.io/faiscadev/fakecloud`) emulates AWS on `localhost:4566` and forwards Bedrock `invoke_model` calls to an Ollama instance on the host. Two standalone boto3 scripts call the emulated `bedrock-runtime` in an interactive `>>>` loop (`exit` quits): `call_llm.py` sends each question on its own; `call_llm_with_memory.py` keeps the last 5 turns in `session_history` and injects them into the prompt as `User:`/`Assistant:` lines (lost on exit). Each script only holds its own `DEFAULT_PROMPT` and loop; the client setup (`create_bedrock_client`), `call_bedrock_llm`, `textGenerationConfig`, and connection constants live in the shared `bedrock.py`. Not a git repo; no tests, linter, or build step.
+Local AWS Bedrock emulation sandbox. A `fakecloud` container (`ghcr.io/faiscadev/fakecloud`) emulates AWS on `localhost:4566` and forwards Bedrock `invoke_model` calls to an Ollama instance on the host. Two standalone boto3 scripts call the emulated `bedrock-runtime` in an interactive `>>>` loop (`exit` quits): `call_llm.py` sends each question on its own; `call_llm_with_memory.py` keeps the last 5 turns in `session_history` and injects them into the prompt as `User:`/`Assistant:` lines (lost on exit). Each script only holds its own `DEFAULT_PROMPT` and loop; the client setup (`create_bedrock_client`), `call_bedrock_llm`, `textGenerationConfig`, and connection constants live in the shared `bedrock.py`. Git repo, public on GitHub at `sIldefonsoRR/local-bedrock` (branch `main`); no tests, linter, or build step.
 
 ## Commands
 

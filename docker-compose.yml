@@ -1,14 +1,42 @@
 version: '3.8'
 
 services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11435:11434"  # <-- 11435 on the host so it doesn't clash with a host Ollama on 11434
+    environment:
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-deepseek-r1:1.5b}
+    volumes:
+      - ollama:/root/.ollama  # <-- Keeps pulled models across restarts
+    # Start the server, pull the model if it isn't there yet, then keep serving
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        ollama serve &
+        until ollama list >/dev/null 2>&1; do sleep 1; done
+        ollama show "$$OLLAMA_MODEL" >/dev/null 2>&1 || ollama pull "$$OLLAMA_MODEL"
+        wait
+    healthcheck:
+      test: ["CMD-SHELL", "ollama show \"$$OLLAMA_MODEL\" >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15m  # <-- First boot downloads the model
+
   fakecloud:
     image: ghcr.io/faiscadev/fakecloud:latest  # <-- Correct GHCR address
     container_name: fakecloud
     ports:
       - "4566:4566"
     environment:
-      - FAKECLOUD_BEDROCK_UPSTREAM_URL=http://host.docker.internal:11434
+      - FAKECLOUD_BEDROCK_UPSTREAM_URL=http://ollama:11434
       - FAKECLOUD_BEDROCK_UPSTREAM_PROTOCOL=ollama
-      - FAKECLOUD_BEDROCK_UPSTREAM_MODEL=deepseek-r1:1.5b
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - FAKECLOUD_BEDROCK_UPSTREAM_MODEL=${OLLAMA_MODEL:-deepseek-r1:1.5b}
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+volumes:
+  ollama:

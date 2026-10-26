@@ -98,6 +98,17 @@ The response format depends on `modelId`: a Titan ID such as `amazon.titan-text-
 
 DeepSeek-R1 reasons before answering, so keep `maxTokenCount` high (1000 in `bedrock.py`). With only 100 tokens, it exhausts before finishing and returns an empty output.
 
+## Image versions
+
+Both images (`ollama/ollama` and `ghcr.io/faiscadev/fakecloud`) are pinned to a release in their `image:` lines in `docker-compose.yml` instead of tracking `latest`, so a rebuild upstream can't change behaviour under you. That file is the only place the versions are recorded.
+
+To bump one:
+
+1. Pick a release from [Ollama releases](https://github.com/ollama/ollama/releases) or [fakecloud releases](https://github.com/faiscadev/fakecloud/releases). Image tags drop the `v` from release names (release `vX.Y.Z` is image tag `X.Y.Z`).
+2. Change the `image:` line in `docker-compose.yml`.
+3. Pull and recreate: `docker compose pull && docker compose up -d --wait`.
+4. Check that a call still works, e.g. `python call_llm.py`, and that `docker logs fakecloud` shows no upstream errors.
+
 ## SBOM
 
 `sbom.cdx.json` is a [CycloneDX](https://cyclonedx.org) 1.6 software bill of materials for the Python dependencies in `requirements.txt`, with versions, licences, package URLs and the dependency graph. It does not cover the `fakecloud` or `ollama` container images.

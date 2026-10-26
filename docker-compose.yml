@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.40.11
     container_name: ollama
     ports:
       - "11435:11434"  # <-- 11435 on the host so it doesn't clash with a host Ollama on 11434
@@ -26,7 +24,7 @@ services:
       start_period: 15m  # <-- First boot downloads the model
 
   fakecloud:
-    image: ghcr.io/faiscadev/fakecloud:latest  # <-- Correct GHCR address
+    image: ghcr.io/faiscadev/fakecloud:0.51.0
     container_name: fakecloud
     ports:
       - "4566:4566"

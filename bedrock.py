@@ -15,7 +15,6 @@ def create_bedrock_client():
     """
     Create a Bedrock Runtime Client pointed at fakecloud
     """
-    # 📌 Create a Bedrock Runtime Client pointed at fakecloud
     return boto3.client(
         service_name="bedrock-runtime",
         region_name=DEFAULT_REGION,

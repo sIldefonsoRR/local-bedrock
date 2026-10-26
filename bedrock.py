@@ -12,6 +12,9 @@ DEFAULT_MODEL_ID = "amazon.titan-text-express-v1"
 
 
 def create_bedrock_client():
+    """
+    Create a Bedrock Runtime Client pointed at fakecloud
+    """
     # 📌 Create a Bedrock Runtime Client pointed at fakecloud
     return boto3.client(
         service_name="bedrock-runtime",
@@ -26,12 +29,15 @@ def call_bedrock_llm(bedrock_client, prompt, model_id=DEFAULT_MODEL_ID):
     """
     Call the Bedrock API and return the response text
     Args:
+        bedrock_client: The Bedrock Runtime Client
         prompt: The prompt to send to the Bedrock API
+        model_id: The model ID to use
     Returns:
         (text, is_reply): the model's reply and True, or a diagnostic
         message (empty response, raw JSON, error) and False
     """
     try:
+        # 📌 Call the Bedrock API and return the response text
         response = bedrock_client.invoke_model(
             modelId=model_id,
             body=json.dumps({

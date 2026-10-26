@@ -2,9 +2,34 @@
 
 Call AWS Bedrock's API locally, without an AWS account. [fakecloud](https://github.com/faiscadev/fakecloud) emulates AWS at `localhost:4566` and forwards Bedrock `InvokeModel` requests to a local [Ollama](https://ollama.com) instance.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph host["Your machine"]
+        subgraph venv["Python 3.13 (.venv)"]
+            stateless["call_llm.py<br/>(stateless)"]
+            memory["call_llm_with_memory.py<br/>(last 5 turns as context)"]
+            shared["bedrock.py<br/>create_bedrock_client()<br/>call_bedrock_llm()"]
+        end
+        ollama[("Ollama :11434<br/>deepseek-r1:1.5b")]
+        subgraph docker["Docker"]
+            fakecloud["fakecloud :4566<br/>emulated bedrock-runtime"]
+        end
+    end
+
+    stateless --> shared
+    memory --> shared
+    shared -- "1. InvokeModel (boto3, dummy credentials)<br/>modelId amazon.titan-text-express-v1<br/>Titan body: inputText + textGenerationConfig" --> fakecloud
+    fakecloud -- "2. POST /api/chat via host.docker.internal<br/>model = FAKECLOUD_BEDROCK_UPSTREAM_MODEL" --> ollama
+    ollama -- "3. chat reply" --> fakecloud
+    fakecloud -- "4. Titan response: results[].outputText" --> shared
 ```
-call_llm*.py (boto3) ──► fakecloud :4566 (bedrock-runtime) ──► Ollama on host
-```
+
+1. A script wraps your question in its `DEFAULT_PROMPT` and calls `call_bedrock_llm()`, which sends a Bedrock `InvokeModel` request with boto3 to `localhost:4566` instead of AWS.
+2. fakecloud translates it into an Ollama `/api/chat` request. It ignores the model in `modelId` and uses `FAKECLOUD_BEDROCK_UPSTREAM_MODEL` from `docker-compose.yml`; the container reaches the host's Ollama through `host.docker.internal`.
+3. Ollama generates the reply with the local model.
+4. fakecloud wraps the reply in the response format of the requested `modelId` (Titan here), and `call_bedrock_llm()` extracts the text. Real AWS is never contacted.
 
 ## Requirements
 

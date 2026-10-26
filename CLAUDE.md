@@ -17,6 +17,8 @@ python call_llm_with_memory.py       # interactive, last 5 turns as context
 docker logs -f fakecloud             # inspect emulator / Ollama forwarding
 ```
 
+`sbom.cdx.json` (CycloneDX 1.6) mirrors `requirements.txt`; regenerate it whenever dependencies change (command in README.md, then drop `pip` from it).
+
 Ollama must be running on the host with the model named in `FAKECLOUD_BEDROCK_UPSTREAM_MODEL` (`docker-compose.yml`) pulled — currently `deepseek-r1:1.5b`. Both scripts use the Bedrock ID `amazon.titan-text-express-v1` (`DEFAULT_MODEL_ID` in `bedrock.py`); each script's prompt template is its own `DEFAULT_PROMPT` (asks for one sentence, max 20 words).
 
 ## How the pieces connect

@@ -63,6 +63,19 @@ The response format depends on `modelId`: a Titan ID such as `amazon.titan-text-
 
 DeepSeek-R1 reasons before answering, so keep `maxTokenCount` high (1000 in the script). With only 100 tokens, it exhausts before finishing and returns an empty output.
 
+## SBOM
+
+`sbom.cdx.json` is a [CycloneDX](https://cyclonedx.org) 1.6 software bill of materials for the Python dependencies in `requirements.txt`, with versions, licences, package URLs and the dependency graph. It does not cover the `fakecloud` container image or Ollama.
+
+To regenerate it after changing dependencies (requires [uv](https://docs.astral.sh/uv/)):
+
+```bash
+uvx --from cyclonedx-bom cyclonedx-py environment .venv/bin/python \
+  --mc-type application --output-reproducible --of JSON -o sbom.cdx.json
+```
+
+The venv's own `pip` ends up in the output; remove its entry from `components` and `dependencies` so the SBOM matches `requirements.txt`.
+
 ## Troubleshooting
 
 - **Check emulator logs:** `docker logs -f fakecloud`
